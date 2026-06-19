@@ -25,3 +25,5 @@ Thumbs.db
 
 # Build output (Streamlit은 static/ 사용)
 dist/
+
+.vercel

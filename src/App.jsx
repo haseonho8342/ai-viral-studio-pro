@@ -1,80 +1,64 @@
 import { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import Workspace from './components/Workspace';
+import Home from './components/Home';
+import YoutubeSearch from './components/YoutubeSearch';
+import YoutubeDetail from './components/YoutubeDetail';
+import AiAnalysis from './components/AiAnalysis';
+import DownloadCenter from './components/DownloadCenter';
+import DashboardPage from './components/DashboardPage';
+import HistoryPage from './components/HistoryPage';
 import Settings from './components/Settings';
-import TikTokSourcing from './components/TikTokSourcing';
-import CoupangPartners from './components/CoupangPartners';
-import InpockLink from './components/InpockLink';
-import TranslateStudio from './components/TranslateStudio';
-import ScriptGenerator from './components/ScriptGenerator';
-import ThumbnailStudio from './components/ThumbnailStudio';
-import Analytics from './components/Analytics';
-import YoutubeShortsLive from './components/YoutubeShortsLive';
-import { useDashboard } from './hooks/useDashboard';
-import { useWorkspace } from './hooks/useWorkspace';
 import './styles/global.css';
+import './styles/youtube-platform.css';
 
 function AppContent() {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
-  const { state, setMobileMenuOpen } = useApp();
-  const dashboard = useDashboard();
-  const workspace = useWorkspace();
+  const [activeMenu, setActiveMenu] = useState('home');
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
+  const { state, setMobileMenuOpen, analysisVideo, analysisSubtitle, setAnalysisContext, clearAnalysisContext } = useApp();
+
+  const goToVideo = (videoId) => {
+    setSelectedVideoId(videoId);
+    setActiveMenu('youtubeDetail');
+  };
+
+  const goToAnalyze = (video, subtitle) => {
+    setAnalysisContext(video, subtitle);
+    setActiveMenu('aiAnalysis');
+  };
 
   const renderPage = () => {
     switch (activeMenu) {
-      case 'dashboard':
+      case 'home':
+        return <Home onNavigate={setActiveMenu} />;
+      case 'youtubeSearch':
+        return <YoutubeSearch onSelectVideo={goToVideo} />;
+      case 'youtubeDetail':
         return (
-          <div className="app-content">
-            <Dashboard
-              stats={dashboard.stats}
-              isLoading={dashboard.isLoading}
-              error={dashboard.error}
-              syncedAt={dashboard.syncedAt}
-              source={dashboard.source}
-              onRefresh={dashboard.refresh}
-              onNavigateShorts={() => setActiveMenu('youtubeLive')}
-              selectedCardId={workspace.selectedCard?.id}
-              onSelectCard={workspace.selectCard}
-            />
-            <Workspace
-              selectedCard={workspace.selectedCard}
-              analysis={workspace.analysis}
-              isAnalyzing={workspace.isAnalyzing}
-              scriptTone={workspace.scriptTone}
-              aiSource={workspace.aiSource}
-              analysisError={workspace.analysisError}
-              geminiBlocked={workspace.geminiBlocked}
-              copiedId={workspace.copiedId}
-              onToneChange={workspace.setTone}
-              onCopy={workspace.copyToClipboard}
-              onRetryGemini={workspace.retryGemini}
-            />
-          </div>
+          <YoutubeDetail
+            videoId={selectedVideoId}
+            onBack={() => setActiveMenu('youtubeSearch')}
+            onAnalyze={goToAnalyze}
+          />
         );
-      case 'youtubeLive':
-        return <YoutubeShortsLive workspace={workspace} />;
-      case 'tiktok':
-        return <TikTokSourcing />;
-      case 'coupang':
-        return <CoupangPartners />;
-      case 'inpock':
-        return <InpockLink />;
-      case 'translate':
-        return <TranslateStudio />;
-      case 'xiaohongshu':
-        return <TranslateStudio focusXhs />;
-      case 'script':
-        return <ScriptGenerator />;
-      case 'thumbnail':
-        return <ThumbnailStudio />;
-      case 'analytics':
-        return <Analytics />;
+      case 'aiAnalysis':
+        return (
+          <AiAnalysis
+            video={analysisVideo}
+            subtitle={analysisSubtitle}
+            onClear={clearAnalysisContext}
+          />
+        );
+      case 'downloadCenter':
+        return <DownloadCenter />;
+      case 'dashboard':
+        return <DashboardPage onSelectVideo={goToVideo} onNavigate={setActiveMenu} />;
+      case 'history':
+        return <HistoryPage onSelectVideo={goToVideo} />;
       case 'settings':
         return <Settings />;
       default:
-        return null;
+        return <Home onNavigate={setActiveMenu} />;
     }
   };
 
@@ -82,21 +66,17 @@ function AppContent() {
     <div className="app-layout">
       <Sidebar
         activeMenu={activeMenu}
-        onMenuChange={setActiveMenu}
+        onMenuChange={(id) => {
+          if (id !== 'youtubeDetail') setSelectedVideoId(null);
+          setActiveMenu(id);
+        }}
         mobileOpen={state.mobileMenuOpen}
         onMobileToggle={setMobileMenuOpen}
       />
-
       <main className="app-main">
         {renderPage()}
-
         <footer className="app-footer">
-          <p>© 2026 AI Viral Studio PRO v4.0. All Rights Reserved.</p>
-          <div className="app-footer-links">
-            <span>이용약관</span>
-            <span>개인정보처리방침</span>
-            <span>고객센터</span>
-          </div>
+          <p>© 2026 AI YouTube Learning Platform v5.0</p>
         </footer>
       </main>
     </div>
