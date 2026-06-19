@@ -9,7 +9,7 @@ const YT_STORAGE_KEY = 'youtube_api_key';
 
 export default function Settings() {
   const [youtubeKey, setYoutubeKeyInput] = useState(getYouTubeApiKey());
-  const [apiBase, setApiBase] = useState(getRuntimeEnv('VITE_API_BASE_URL') || 'http://localhost:8000');
+  const [apiBase] = useState(getRuntimeEnv('VITE_API_BASE_URL') || '(미설정)');
   const [ytSaved, setYtSaved] = useState(false);
   const [showYtKey, setShowYtKey] = useState(false);
   const [dbStatus, setDbStatus] = useState({ enabled: false, connected: false, message: '확인 중...' });

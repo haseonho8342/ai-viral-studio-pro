@@ -32,3 +32,5 @@ __pycache__/
 api/__pycache__/
 
 .vercel
+.env.vercel
+.env.production.local
