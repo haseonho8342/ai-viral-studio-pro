@@ -1,0 +1,11 @@
+# Vercel은 React 프론트엔드만 배포 (Python/FastAPI 제외)
+app.py
+streamlit_app.py
+requirements.txt
+api/
+static/
+.streamlit/
+scripts/prepare-streamlit.mjs
+__pycache__/
+*.pyc
+render.yaml

@@ -26,4 +26,9 @@ Thumbs.db
 # Build output (Streamlit은 static/ 사용)
 dist/
 
+# Python
+__pycache__/
+*.pyc
+api/__pycache__/
+
 .vercel
