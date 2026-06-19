@@ -8,6 +8,7 @@ dist/
 .env
 .env.local
 .env.*.local
+.streamlit/secrets.toml
 
 # Logs
 *.log
@@ -22,6 +23,5 @@ Thumbs.db
 # Vite cache
 .vite/
 
-# Cloudflare Wrangler
-.wrangler/
-.dev.vars
+# Build output (Streamlit은 static/ 사용)
+dist/

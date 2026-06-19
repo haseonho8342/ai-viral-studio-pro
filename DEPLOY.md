@@ -1,90 +1,89 @@
-# Cloudflare Pages 배포 가이드
+# Streamlit Community Cloud 배포 가이드
 
-AI Viral Studio PRO를 **Cloudflare Pages**에 배포하는 방법입니다.  
-GitHub 저장소와 연동하면 `main` 브랜치 push 시 자동 배포됩니다.
+**Streamlit Community Cloud** (share.streamlit.io) 에 배포하는 방법입니다.
 
----
-
-## 방법 A — Cloudflare 대시보드 (가장 쉬움)
-
-### 1. Cloudflare 가입
-https://dash.cloudflare.com/sign-up
-
-### 2. Pages 프로젝트 생성
-1. **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-2. GitHub 계정 연결 → `haseonho8342/ai-viral-studio-pro` 선택
-3. 빌드 설정:
-
-| 항목 | 값 |
-|------|-----|
-| Framework preset | Vite |
-| Build command | `npm run build` |
-| Build output directory | `dist` |
-| Node version | `20` |
-
-### 3. 환경 변수 (Settings → Environment variables)
-
-| 변수 | 필수 | 설명 |
-|------|------|------|
-| `VITE_YOUTUBE_API_KEY` | ✅ | YouTube Data API v3 키 |
-| `VITE_GEMINI_API_KEY` | 선택 | Gemini API 키 |
-
-Production / Preview 모두에 추가하세요.
-
-### 4. Deploy 클릭
-
-배포 완료 후 URL 예시:
-`https://ai-viral-studio-pro.pages.dev`
+> React 앱을 `app.py` + `static/` 폴더로 감싸서 Streamlit Cloud에서 실행합니다.
 
 ---
 
-## 방법 B — GitHub Actions 자동 배포
-
-`.github/workflows/cloudflare-pages.yml` 이 포함되어 있습니다.
-
-### GitHub Secrets 등록
-
-저장소 → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-
-| Secret 이름 | 설명 |
-|-------------|------|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API 토큰 (Pages Edit 권한) |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 대시보드 우측 Account ID |
-| `VITE_YOUTUBE_API_KEY` | YouTube API 키 |
-| `VITE_GEMINI_API_KEY` | Gemini API 키 (선택) |
-
-### API 토큰 발급
-1. Cloudflare → **My Profile** → **API Tokens**
-2. **Create Token** → **Edit Cloudflare Workers** 템플릿 사용
-3. Account Resources: 해당 계정 전체
-4. Zone Resources: All zones (또는 해당 zone)
-
-`main` 브랜치에 push하면 자동 배포됩니다.
-
----
-
-## 로컬에서 수동 배포
+## 1. 로컬 빌드 (최초 1회 + 코드 변경 시)
 
 ```bash
 npm install
-npm run build
-npx wrangler pages deploy dist --project-name=ai-viral-studio-pro
+npm run build:streamlit
 ```
 
-최초 1회 Cloudflare 로그인 필요:
+`static/` 폴더가 생성됩니다. **이 폴더를 GitHub에 함께 push** 해야 합니다.
+
 ```bash
-npx wrangler login
+git add static app.py requirements.txt .streamlit
+git commit -m "Update Streamlit build"
+git push origin main
 ```
 
 ---
 
-## 커스텀 도메인
+## 2. Streamlit Cloud 배포
 
-Cloudflare Pages → 프로젝트 → **Custom domains** → 도메인 추가
+1. https://share.streamlit.io 접속
+2. **Continue with GitHub** 로그인
+3. **Create app** 클릭
+4. 설정 입력:
+
+| 항목 | 값 |
+|------|-----|
+| Repository | `haseonho8342/ai-viral-studio-pro` |
+| Branch | `main` |
+| Main file path | `app.py` |
+| App URL | 원하는 이름 (예: `ai-viral-studio`) |
+
+5. **Advanced settings → Secrets** 에 아래 형식 입력:
+
+```toml
+VITE_YOUTUBE_API_KEY = "본인_YouTube_API_키"
+VITE_GEMINI_API_KEY = "본인_Gemini_API_키"
+```
+
+6. **Deploy** 클릭
+
+배포 URL 예시: `https://ai-viral-studio.streamlit.app`
 
 ---
 
-## 보안 참고
+## 3. 코드 수정 후 재배포
 
-- `VITE_` 환경 변수는 **빌드 시 클라이언트 번들에 포함**됩니다.
-- 운영 환경에서는 API 키를 **Cloudflare Workers 프록시**로 숨기는 것을 권장합니다.
+```bash
+# 1. React 코드 수정
+npm run build:streamlit
+
+# 2. GitHub push
+git add .
+git commit -m "Update app"
+git push
+```
+
+Streamlit Cloud가 자동으로 재배포합니다.
+
+---
+
+## 주의사항
+
+- **무료 플랜**: GitHub **Public** 저장소만 지원
+- **API 키**: Streamlit Secrets에 저장 (GitHub에 올리지 않음)
+- **슬립 모드**: 12시간 미사용 시 앱이 잠들 수 있음 → 첫 방문 시 깨우기 버튼 표시
+- Streamlit Cloud는 **npm 빌드를 실행하지 않음** → `static/` 폴더를 직접 commit해야 함
+
+---
+
+## 로컬 Streamlit 테스트
+
+```bash
+pip install -r requirements.txt
+npm run build:streamlit
+
+# .streamlit/secrets.toml 생성 (로컬용, Git 제외)
+# VITE_YOUTUBE_API_KEY = "..."
+# VITE_GEMINI_API_KEY = "..."
+
+streamlit run app.py
+```

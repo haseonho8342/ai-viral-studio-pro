@@ -5,6 +5,7 @@
 
 import { calculateCoupangScore } from './coupangEngine';
 import { calculateViralScore, formatViewCount, filterAndSortCards } from './viralEngine';
+import { getRuntimeEnv } from '../lib/runtimeConfig';
 
 const CATEGORY_KEYWORDS = {
   '리빙/아이디어': ['리빙', '주방', '정리', '수납', '살림', '자취', '인테리어', '홈'],
@@ -16,7 +17,7 @@ const CATEGORY_KEYWORDS = {
 
 export function getYouTubeApiKey() {
   return (
-    import.meta.env.VITE_YOUTUBE_API_KEY?.trim() ||
+    getRuntimeEnv('VITE_YOUTUBE_API_KEY') ||
     localStorage.getItem('youtube_api_key')?.trim() ||
     ''
   );

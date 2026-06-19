@@ -4,6 +4,7 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
+import { getRuntimeEnv } from '../lib/runtimeConfig';
 
 const STORAGE_KEY = 'gemini_api_key';
 const DEFAULT_MODEL = 'gemini-2.0-flash';
@@ -37,7 +38,7 @@ export function isQuotaError(err) {
 
 export function getApiKey() {
   return (
-    import.meta.env.VITE_GEMINI_API_KEY?.trim() ||
+    getRuntimeEnv('VITE_GEMINI_API_KEY') ||
     localStorage.getItem(STORAGE_KEY)?.trim() ||
     ''
   );

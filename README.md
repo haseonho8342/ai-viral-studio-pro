@@ -69,20 +69,23 @@ src/
 - YouTube Data API v3
 - Google Gemini API (선택)
 
-## Cloudflare Pages 배포
+## Streamlit Community Cloud 배포
 
 자세한 내용은 [DEPLOY.md](./DEPLOY.md) 참고.
 
-1. https://dash.cloudflare.com → **Workers & Pages** → GitHub 연동
-2. 빌드: `npm run build` / 출력: `dist`
-3. 환경 변수: `VITE_YOUTUBE_API_KEY`, `VITE_GEMINI_API_KEY`
+```bash
+npm run build:streamlit   # static/ 폴더 생성
+git push origin main        # GitHub push
+```
 
-`main` push 시 GitHub Actions로 자동 배포도 가능합니다.
+1. https://share.streamlit.io → GitHub 연동
+2. Main file: `app.py`
+3. Secrets: `VITE_YOUTUBE_API_KEY`, `VITE_GEMINI_API_KEY`
 
 ## 보안
 
-- `.env.local`은 Git에 포함되지 않습니다.
-- 배포 시 API 키는 백엔드 프록시 사용을 권장합니다.
+- `.env.local` / `.streamlit/secrets.toml` 은 Git에 포함되지 않습니다.
+- Streamlit Cloud **Secrets** 탭에서 API 키를 설정하세요.
 
 ## 라이선스
 
