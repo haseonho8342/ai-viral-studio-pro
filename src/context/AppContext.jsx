@@ -129,6 +129,10 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     loadShortsFeed('KR');
+
+    const onConfigReady = () => loadShortsFeed('KR');
+    window.addEventListener('runtime-config-ready', onConfigReady);
+    return () => window.removeEventListener('runtime-config-ready', onConfigReady);
   }, [loadShortsFeed]);
 
   const selectCard = useCallback((card) => {

@@ -1,8 +1,22 @@
 /**
  * Streamlit Cloud Secrets → window.__RUNTIME_CONFIG__ 런타임 주입
+ * Streamlit iframe 부모가 postMessage로 키를 전달합니다.
  */
 
 const SECRET_KEYS = new Set(['VITE_GEMINI_API_KEY', 'VITE_YOUTUBE_API_KEY']);
+
+export function initRuntimeConfigBridge() {
+  if (typeof window === 'undefined') return;
+
+  window.addEventListener('message', (event) => {
+    if (event.data?.type !== 'RUNTIME_CONFIG' || !event.data.config) return;
+    window.__RUNTIME_CONFIG__ = {
+      ...window.__RUNTIME_CONFIG__,
+      ...event.data.config,
+    };
+    window.dispatchEvent(new CustomEvent('runtime-config-ready'));
+  });
+}
 
 export function getRuntimeEnv(key) {
   if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__?.[key]) {
