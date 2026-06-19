@@ -1,0 +1,12 @@
+# Render.com 배포용 (FastAPI + yt-dlp)
+services:
+  - type: web
+    name: ai-viral-studio-api
+    runtime: python
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+    healthCheckPath: /health

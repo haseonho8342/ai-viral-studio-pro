@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchVideoDetail } from '../services/youtubeSearchEngine';
 import { saveVideo } from '../services/videoDb';
-import { fetchSubtitles, getDownloadUrl } from '../services/downloadApi';
+import { fetchSubtitles, getDownloadUrl, isApiConfigured } from '../services/downloadApi';
 import '../styles/youtube-platform.css';
 
 export default function YoutubeDetail({ videoId, onBack, onAnalyze }) {
@@ -24,15 +24,19 @@ export default function YoutubeDetail({ videoId, onBack, onAnalyze }) {
       .finally(() => setLoading(false));
   }, [videoId]);
 
-  const handleSubtitle = async (auto = false) => {
+  const handleSubtitle = async () => {
     if (!video) return;
     setSubLoading(true);
     setSubError('');
     try {
       const res = await fetchSubtitles(video.url);
-      setSubtitle(res.text || '');
+      if (res.text) {
+        setSubtitle(res.text);
+      } else {
+        setSubError('자막을 찾을 수 없습니다.');
+      }
     } catch (err) {
-      setSubError(err.message);
+      setSubError(err.message || '자막이 없습니다. 공식·자동 자막 모두 없음.');
     } finally {
       setSubLoading(false);
     }
@@ -89,13 +93,16 @@ export default function YoutubeDetail({ videoId, onBack, onAnalyze }) {
       </div>
 
       <div className="yt-actions">
-        <a href={getDownloadUrl('video', video.url)} className="yt-btn yt-btn--sm" download>영상 다운로드</a>
-        <a href={getDownloadUrl('mp3', video.url)} className="yt-btn yt-btn--sm" download>MP3 다운로드</a>
-        <button type="button" className="yt-btn yt-btn--sm yt-btn--outline" onClick={() => handleSubtitle(false)} disabled={subLoading}>
-          자막 다운로드
-        </button>
-        <button type="button" className="yt-btn yt-btn--sm yt-btn--outline" onClick={() => handleSubtitle(true)} disabled={subLoading}>
-          자동 자막 다운로드
+        {isApiConfigured() ? (
+          <>
+            <a href={getDownloadUrl('video', video.url)} className="yt-btn yt-btn--sm" download>영상 다운로드</a>
+            <a href={getDownloadUrl('mp3', video.url)} className="yt-btn yt-btn--sm" download>MP3 다운로드</a>
+          </>
+        ) : (
+          <span className="yt-card-meta">FastAPI 미연결 — 다운로드 기능 비활성</span>
+        )}
+        <button type="button" className="yt-btn yt-btn--sm yt-btn--outline" onClick={handleSubtitle} disabled={subLoading || !isApiConfigured()}>
+          자막 추출
         </button>
         {subtitle && (
           <button type="button" className="yt-btn yt-btn--sm" onClick={() => onAnalyze(video, subtitle)}>

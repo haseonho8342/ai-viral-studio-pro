@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getYouTubeApiKey } from '../services/youtubeSearchEngine';
 import { getSupabaseStatus } from '../services/supabaseDb';
 import { getRuntimeEnv } from '../lib/runtimeConfig';
+import { checkApiHealth, isApiConfigured } from '../services/downloadApi';
 import '../styles/settings.css';
 
 const YT_STORAGE_KEY = 'youtube_api_key';
@@ -12,9 +13,12 @@ export default function Settings() {
   const [ytSaved, setYtSaved] = useState(false);
   const [showYtKey, setShowYtKey] = useState(false);
   const [dbStatus, setDbStatus] = useState({ enabled: false, connected: false, message: '확인 중...' });
+  const [apiOk, setApiOk] = useState(null);
 
   useEffect(() => {
     getSupabaseStatus().then(setDbStatus);
+    if (isApiConfigured()) checkApiHealth().then(setApiOk);
+    else setApiOk(false);
   }, []);
 
   const handleYtSave = () => {
@@ -76,16 +80,18 @@ export default function Settings() {
       </section>
 
       <section className="settings-card">
-        <h3>🐍 FastAPI (yt-dlp + OpenAI)</h3>
+        <div className="settings-card-header">
+          <h3>🐍 FastAPI (yt-dlp + OpenAI)</h3>
+          <span className={`settings-status ${apiOk ? 'settings-status--active' : 'settings-status--inactive'}`}>
+            {apiOk === null ? '확인 중...' : apiOk ? '● 연결됨' : '○ 미연결'}
+          </span>
+        </div>
         <p className="settings-desc">
           다운로드·자막·AI 분석은 FastAPI 서버가 필요합니다.
-          로컬: <code>cd api && pip install -r requirements.txt && uvicorn main:app --port 8000</code>
         </p>
         <p className="settings-env-notice">
-          API 주소: <code>{apiBase}</code> (Vercel env: VITE_API_BASE_URL)
-        </p>
-        <p className="settings-desc" style={{ marginTop: '0.5rem' }}>
-          FastAPI 서버 env: <code>OPENAI_API_KEY</code>
+          API 주소: <code>{apiBase || '(미설정)'}</code>
+          {!isApiConfigured() && ' — Vercel에 VITE_API_BASE_URL 설정 필요'}
         </p>
       </section>
 

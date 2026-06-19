@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { analyzeSubtitles } from '../services/downloadApi';
 import { saveAnalysis } from '../services/videoDb';
 import '../styles/youtube-platform.css';
@@ -13,11 +13,28 @@ const MODES = [
   { id: 'important', label: '중요 문장' },
 ];
 
+function buildPayload(subtitle, results) {
+  return {
+    subtitle,
+    summary: results.summary || '',
+    threeLineSummary: results.three_line || '',
+    keywords: results.keywords || '',
+    studyNote: results.study_note || '',
+    blogSummary: results.blog || '',
+    koreanTranslation: results.translate || '',
+    importantSentences: results.important || '',
+  };
+}
+
 export default function AiAnalysis({ video, subtitle: initialSubtitle, onClear }) {
   const [subtitle, setSubtitle] = useState(initialSubtitle || '');
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (initialSubtitle) setSubtitle(initialSubtitle);
+  }, [initialSubtitle]);
 
   const runAnalysis = async (mode) => {
     if (!subtitle.trim()) {
@@ -28,18 +45,10 @@ export default function AiAnalysis({ video, subtitle: initialSubtitle, onClear }
     setError('');
     try {
       const res = await analyzeSubtitles(subtitle, mode);
-      setResults((prev) => ({ ...prev, [mode]: res.result }));
+      const next = { ...results, [mode]: res.result };
+      setResults(next);
       if (video?.videoId) {
-        await saveAnalysis(video.videoId, {
-          subtitle,
-          summary: mode === 'summary' ? res.result : results.summary || '',
-          threeLineSummary: mode === 'three_line' ? res.result : results.three_line || '',
-          keywords: mode === 'keywords' ? res.result : results.keywords || '',
-          studyNote: mode === 'study_note' ? res.result : results.study_note || '',
-          blogSummary: mode === 'blog' ? res.result : results.blog || '',
-          koreanTranslation: mode === 'translate' ? res.result : results.translate || '',
-          importantSentences: mode === 'important' ? res.result : results.important || '',
-        });
+        await saveAnalysis(video.videoId, buildPayload(subtitle, next));
       }
     } catch (err) {
       setError(err.message);
