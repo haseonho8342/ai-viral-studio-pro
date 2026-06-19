@@ -71,7 +71,7 @@ Streamlit Cloud가 자동으로 재배포합니다.
 - **무료 플랜**: GitHub **Public** 저장소만 지원
 - **API 키**: Streamlit Secrets에 저장 (GitHub에 올리지 않음)
 - **슬립 모드**: 12시간 미사용 시 앱이 잠들 수 있음 → 첫 방문 시 깨우기 버튼 표시
-- Streamlit Cloud는 **npm 빌드를 실행하지 않음** → `static/` 폴더를 직접 commit해야 함
+- Streamlit 정적 파일 경로는 `/app/static/` 입니다 (`/-/static/` 아님)
 
 ---
 

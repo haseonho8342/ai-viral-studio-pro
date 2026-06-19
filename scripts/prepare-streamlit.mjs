@@ -6,12 +6,12 @@ import { execSync } from 'child_process';
 
 const env = {
   ...process.env,
-  VITE_BASE_PATH: '/-/static/',
+  VITE_BASE_PATH: '/app/static/',
   VITE_GEMINI_API_KEY: '',
   VITE_YOUTUBE_API_KEY: '',
 };
 
-console.log('Building for Streamlit Cloud (base: /-/static/)...');
+console.log('Building for Streamlit Cloud (base: /app/static/)...');
 execSync('npm run build', { stdio: 'inherit', env });
 
 if (existsSync('static')) rmSync('static', { recursive: true });

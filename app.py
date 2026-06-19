@@ -1,6 +1,6 @@
 """
 AI Viral Studio PRO — Streamlit Community Cloud 진입점
-React 빌드 결과(static/)를 iframe으로 표시하고 Secrets를 주입합니다.
+React 빌드 결과(static/)를 표시하고 Secrets를 런타임 주입합니다.
 """
 
 import json
@@ -14,19 +14,21 @@ STATIC = ROOT / "static"
 INDEX = STATIC / "index.html"
 
 
-def write_runtime_config() -> None:
+def load_secrets_config() -> dict:
     try:
-        config = {
+        return {
             "VITE_YOUTUBE_API_KEY": st.secrets.get("VITE_YOUTUBE_API_KEY", ""),
             "VITE_GEMINI_API_KEY": st.secrets.get("VITE_GEMINI_API_KEY", ""),
         }
     except Exception:
-        config = {"VITE_YOUTUBE_API_KEY": "", "VITE_GEMINI_API_KEY": ""}
+        return {"VITE_YOUTUBE_API_KEY": "", "VITE_GEMINI_API_KEY": ""}
 
-    (STATIC / "runtime-config.js").write_text(
-        f"window.__RUNTIME_CONFIG__ = {json.dumps(config)};",
-        encoding="utf-8",
-    )
+
+def build_spa_html() -> str:
+    html = INDEX.read_text(encoding="utf-8")
+    config = load_secrets_config()
+    inline = f"<script>window.__RUNTIME_CONFIG__={json.dumps(config)};</script>"
+    return html.replace('<script src="./runtime-config.js"></script>', inline)
 
 
 st.set_page_config(
@@ -54,6 +56,4 @@ if not INDEX.exists():
     )
     st.stop()
 
-write_runtime_config()
-
-components.iframe("/-/static/index.html", height=900, scrolling=True)
+components.html(build_spa_html(), height=900, scrolling=True)

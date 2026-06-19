@@ -7,6 +7,23 @@ import { calculateCoupangScore } from './coupangEngine';
 import { calculateViralScore, formatViewCount, filterAndSortCards } from './viralEngine';
 import { getRuntimeEnv } from '../lib/runtimeConfig';
 
+const FETCH_TIMEOUT_MS = 15000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('YouTube API 요청 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const CATEGORY_KEYWORDS = {
   '리빙/아이디어': ['리빙', '주방', '정리', '수납', '살림', '자취', '인테리어', '홈'],
   '뷰티/패션': ['뷰티', '피부', '메이크업', '괄사', '올영', '패션'],
@@ -105,7 +122,7 @@ async function fetchFromYouTubeApi(region = 'KR', keyword = 'shorts 꿀템') {
     key: apiKey,
   });
 
-  const searchRes = await fetch(
+  const searchRes = await fetchWithTimeout(
     `https://www.googleapis.com/youtube/v3/search?${searchParams}`
   );
   if (!searchRes.ok) {
@@ -118,7 +135,7 @@ async function fetchFromYouTubeApi(region = 'KR', keyword = 'shorts 꿀템') {
   if (items.length === 0) throw new Error('검색 결과가 없습니다.');
 
   const videoIds = items.map((it) => it.id?.videoId).filter(Boolean).join(',');
-  const videoRes = await fetch(
+  const videoRes = await fetchWithTimeout(
     `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet,contentDetails&id=${videoIds}&key=${apiKey}`
   );
   if (!videoRes.ok) throw new Error('영상 통계 조회 실패');
