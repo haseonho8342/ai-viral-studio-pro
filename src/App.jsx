@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
-import YoutubeSearch from './components/YoutubeSearch';
+import YoutubeShortsLive from './components/YoutubeShortsLive';
+import { useWorkspace } from './hooks/useWorkspace';
 import YoutubeDetail from './components/YoutubeDetail';
 import AiAnalysis from './components/AiAnalysis';
 import DownloadCenter from './components/DownloadCenter';
@@ -15,6 +16,7 @@ import './styles/youtube-platform.css';
 function AppContent() {
   const [activeMenu, setActiveMenu] = useState('home');
   const [selectedVideoId, setSelectedVideoId] = useState(null);
+  const workspace = useWorkspace();
   const { state, setMobileMenuOpen, analysisVideo, analysisSubtitle, setAnalysisContext, clearAnalysisContext } = useApp();
 
   const goToVideo = (videoId) => {
@@ -32,7 +34,7 @@ function AppContent() {
       case 'home':
         return <Home onNavigate={setActiveMenu} />;
       case 'youtubeSearch':
-        return <YoutubeSearch onSelectVideo={goToVideo} />;
+        return <YoutubeShortsLive workspace={workspace} />;
       case 'youtubeDetail':
         return (
           <YoutubeDetail

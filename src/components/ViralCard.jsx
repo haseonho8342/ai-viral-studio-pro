@@ -10,7 +10,15 @@ function PlatformBadge({ platform }) {
   return <span className="card-platform card-platform--multi">Multi</span>;
 }
 
+function formatUploadDays(publishedAt) {
+  if (!publishedAt) return '-';
+  const days = Math.floor((Date.now() - new Date(publishedAt).getTime()) / 86400000);
+  return `${days}일`;
+}
+
 export default function ViralCard({ card, isSelected, onSelect, showAlgorithm = false }) {
+  const viralPercent = card.trendVelocity ?? card.coupangScore ?? card.viralScore;
+
   return (
     <article
       className={`viral-card ${isSelected ? 'viral-card--selected' : ''}`}
@@ -37,7 +45,7 @@ export default function ViralCard({ card, isSelected, onSelect, showAlgorithm = 
       <div className="viral-card-body">
         <div className="viral-card-meta">
           <span className="viral-card-category">{card.category}</span>
-          <span className="viral-card-engagement">참여율 {card.engagementRate}%</span>
+          <span className="viral-card-engagement">조회수 {card.viewCountFormatted}</span>
         </div>
         <h3 className="viral-card-title">{card.title}</h3>
       </div>
@@ -65,15 +73,13 @@ export default function ViralCard({ card, isSelected, onSelect, showAlgorithm = 
         ) : (
           <>
             <div className="viral-card-metric">
-              <span className="viral-card-metric-label">바이럴</span>
-              <span className={`viral-card-metric-value ${card.viralScore > 90 ? 'viral-card-metric-value--high' : ''}`}>
-                {card.viralScore}점
-              </span>
+              <span className="viral-card-metric-label">업로드일</span>
+              <span className="viral-card-metric-value">{formatUploadDays(card.publishedAt)}</span>
             </div>
             <div className="viral-card-metric">
-              <span className="viral-card-metric-label">쿠팡</span>
-              <span className="viral-card-metric-value viral-card-metric-value--coupang">
-                {card.coupangScore}%
+              <span className="viral-card-metric-label">바이럴</span>
+              <span className={`viral-card-metric-value ${viralPercent > 90 ? 'viral-card-metric-value--high' : ''}`}>
+                {viralPercent}%
               </span>
             </div>
           </>
@@ -88,7 +94,7 @@ export default function ViralCard({ card, isSelected, onSelect, showAlgorithm = 
           onSelect(card);
         }}
       >
-        ✨ {isSelected ? '분석 데이터 확인 중' : '분석하기'}
+        {isSelected ? '👑 분석 데이터 보기' : '+ 분석하기'}
       </button>
     </article>
   );

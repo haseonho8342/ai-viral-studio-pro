@@ -1,13 +1,13 @@
 import '../styles/sidebar.css';
 
 const MENU_ITEMS = [
-  { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'youtubeSearch', label: 'YouTube Search', icon: '🔍' },
-  { id: 'aiAnalysis', label: 'AI Analysis', icon: '🤖' },
-  { id: 'downloadCenter', label: 'Download Center', icon: '⬇️' },
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'history', label: 'History', icon: '📚' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
+  { id: 'home', label: '홈', icon: '🏠' },
+  { id: 'youtubeSearch', label: '유튜브 검색', icon: '🔍' },
+  { id: 'aiAnalysis', label: 'AI 분석', icon: '🤖' },
+  { id: 'downloadCenter', label: '다운로드 센터', icon: '⬇️' },
+  { id: 'dashboard', label: '대시보드', icon: '📊' },
+  { id: 'history', label: '히스토리', icon: '📚' },
+  { id: 'settings', label: '설정', icon: '⚙️' },
 ];
 
 export default function Sidebar({ activeMenu, onMenuChange, mobileOpen, onMobileToggle }) {
@@ -59,7 +59,7 @@ export default function Sidebar({ activeMenu, onMenuChange, mobileOpen, onMobile
         </nav>
 
         <div className="sidebar-footer">
-          <p className="sidebar-footer-label">YouTube AI Platform</p>
+          <p className="sidebar-footer-label">AI 유튜브 학습 플랫폼</p>
           <p className="sidebar-footer-version">v5.0.0 · 2026</p>
         </div>
       </aside>

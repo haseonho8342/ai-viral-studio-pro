@@ -3,7 +3,6 @@ import '../styles/header.css';
 const SHORTS_FILTERS = [
   { id: 'views', label: '조회수', icon: '👁' },
   { id: 'likes', label: '좋아요', icon: '❤️' },
-  { id: 'latest', label: '최신순', icon: '🕐' },
   { id: 'viral', label: '바이럴', icon: '🔥' },
 ];
 
