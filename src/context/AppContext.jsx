@@ -7,25 +7,13 @@ import {
   regenerateScriptsWithGemini,
 } from '../services/analysisEngine';
 import { isGeminiBlocked, setGeminiBlocked } from '../services/geminiService';
-
-const HISTORY_KEY = 'avs_analysis_history_v4';
-const POLL_INTERVAL = 30000;
-
-function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(entry) {
-  const history = loadHistory();
-  const filtered = history.filter((h) => h.cardId !== entry.cardId);
-  const updated = [entry, ...filtered].slice(0, 50);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-  return updated;
-}
+import {
+  initSupabaseSession,
+  fetchAnalysisHistory,
+  upsertAnalysisHistory,
+  fetchUserSettings,
+  upsertUserSettings,
+} from '../services/supabaseDb';
 
 const AppContext = createContext(null);
 
@@ -38,11 +26,12 @@ const initialState = {
   isLoadingShorts: false,
   selectedCard: null,
   analysis: null,
-  analysisHistory: loadHistory(),
+  analysisHistory: [],
   scriptTone: 'aggressive',
   isAnalyzing: false,
   geminiBlocked: isGeminiBlocked(),
   mobileMenuOpen: false,
+  supabaseReady: false,
 };
 
 function appReducer(state, action) {
@@ -99,6 +88,16 @@ function appReducer(state, action) {
     case 'SET_HISTORY':
       return { ...state, analysisHistory: action.payload };
 
+    case 'SET_SUPABASE_READY':
+      return { ...state, supabaseReady: action.payload };
+
+    case 'INIT_USER_SETTINGS':
+      return {
+        ...state,
+        scriptTone: action.payload.scriptTone || state.scriptTone,
+        shortsRegion: action.payload.shortsRegion || state.shortsRegion,
+      };
+
     case 'TOGGLE_MOBILE_MENU':
       return { ...state, mobileMenuOpen: !state.mobileMenuOpen };
 
@@ -128,23 +127,52 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    loadShortsFeed('KR');
+    let cancelled = false;
 
-    const onConfigReady = () => loadShortsFeed('KR');
+    (async () => {
+      const session = await initSupabaseSession();
+      if (!cancelled) dispatch({ type: 'SET_SUPABASE_READY', payload: session.connected });
+
+      const [history, settings] = await Promise.all([
+        fetchAnalysisHistory(),
+        fetchUserSettings(),
+      ]);
+
+      if (cancelled) return;
+      if (history.length) dispatch({ type: 'SET_HISTORY', payload: history });
+      if (settings) {
+        dispatch({
+          type: 'INIT_USER_SETTINGS',
+          payload: {
+            scriptTone: settings.script_tone,
+            shortsRegion: settings.shorts_region,
+          },
+        });
+        loadShortsFeed(settings.shorts_region || 'KR');
+      } else {
+        loadShortsFeed('KR');
+      }
+    })();
+
+    const onConfigReady = () => loadShortsFeed(stateRef.current.shortsRegion);
     window.addEventListener('runtime-config-ready', onConfigReady);
-    return () => window.removeEventListener('runtime-config-ready', onConfigReady);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('runtime-config-ready', onConfigReady);
+    };
   }, [loadShortsFeed]);
 
-  const selectCard = useCallback((card) => {
+  const selectCard = useCallback(async (card) => {
     if (!card) return;
     const analysis = buildWorkspaceAnalysis(card, stateRef.current.scriptTone);
-    const history = saveHistory({
+    const entry = {
       cardId: card.id,
       title: card.title,
       thumbnail: card.thumbnail,
       analyzedAt: new Date().toISOString(),
       viralScore: card.viralScore,
-    });
+    };
+    const history = await upsertAnalysisHistory(entry, analysis);
     dispatch({
       type: 'SELECT_CARD',
       payload: { card, analysis, history },
@@ -160,7 +188,15 @@ export function AppProvider({ children }) {
     try {
       const analysis = await buildAnalysisWithGemini(card, stateRef.current.scriptTone);
       if (stateRef.current.selectedCard?.id === card.id) {
-        dispatch({ type: 'SET_ANALYSIS', payload: analysis });
+        const entry = {
+          cardId: card.id,
+          title: card.title,
+          thumbnail: card.thumbnail,
+          analyzedAt: new Date().toISOString(),
+          viralScore: card.viralScore,
+        };
+        const history = await upsertAnalysisHistory(entry, analysis);
+        dispatch({ type: 'SET_ANALYSIS', payload: analysis, history });
       }
     } catch (err) {
       dispatch({ type: 'SET_GEMINI_BLOCKED', payload: isGeminiBlocked() });
@@ -181,11 +217,19 @@ export function AppProvider({ children }) {
     const current = stateRef.current.analysis;
     const updated = regenerateScriptsLocal(card, tone, current);
     dispatch({ type: 'SET_ANALYSIS', payload: updated });
+    upsertUserSettings({
+      scriptTone: tone,
+      shortsRegion: stateRef.current.shortsRegion,
+    });
   }, []);
 
   const setShortsRegion = useCallback((region) => {
     dispatch({ type: 'SET_SHORTS_REGION', payload: region });
     loadShortsFeed(region);
+    upsertUserSettings({
+      scriptTone: stateRef.current.scriptTone,
+      shortsRegion: region,
+    });
   }, [loadShortsFeed]);
 
   const value = {

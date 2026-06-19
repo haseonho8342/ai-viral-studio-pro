@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getApiKey, setApiKey, isGeminiAvailable } from '../services/geminiService';
 import { getYouTubeApiKey, isYouTubeApiAvailable } from '../services/youtubeShortsEngine';
+import { getSupabaseStatus } from '../services/supabaseDb';
 import '../styles/settings.css';
 
 const YT_STORAGE_KEY = 'youtube_api_key';
@@ -21,6 +22,11 @@ export default function Settings() {
   const [ytSaved, setYtSaved] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [showYtKey, setShowYtKey] = useState(false);
+  const [dbStatus, setDbStatus] = useState({ enabled: false, connected: false, message: '확인 중...' });
+
+  useEffect(() => {
+    getSupabaseStatus().then(setDbStatus);
+  }, []);
 
   const handleSave = () => {
     setApiKey(apiKey);
@@ -55,6 +61,24 @@ export default function Settings() {
         <h2>⚙️ 설정</h2>
         <p>AI 분석 엔진 및 API 키를 관리합니다.</p>
       </div>
+
+      <section className="settings-card">
+        <div className="settings-card-header">
+          <h3>🗄️ Supabase DB</h3>
+          <span className={`settings-status ${dbStatus.connected ? 'settings-status--active' : 'settings-status--inactive'}`}>
+            {dbStatus.connected ? '● 연결됨' : '○ 미연결'}
+          </span>
+        </div>
+        <p className="settings-desc">
+          분석 히스토리와 사용자 설정이 Supabase Postgres에 저장됩니다.
+          {dbStatus.userId && (
+            <span> 세션 ID: <code>{dbStatus.userId.slice(0, 8)}...</code></span>
+          )}
+        </p>
+        <p className="settings-env-notice">
+          {dbStatus.enabled ? `✓ ${dbStatus.message}` : '⚠️ VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 환경 변수를 설정하세요.'}
+        </p>
+      </section>
 
       <section className="settings-card">
         <div className="settings-card-header">

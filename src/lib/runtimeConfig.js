@@ -4,6 +4,7 @@
  */
 
 const SECRET_KEYS = new Set(['VITE_GEMINI_API_KEY', 'VITE_YOUTUBE_API_KEY']);
+const PUBLIC_KEYS = new Set(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']);
 
 export function initRuntimeConfigBridge() {
   if (typeof window === 'undefined') return;
@@ -23,8 +24,12 @@ export function getRuntimeEnv(key) {
     const v = String(window.__RUNTIME_CONFIG__[key]).trim();
     if (v) return v;
   }
-  // 배포 빌드에는 API 키를 번들에 넣지 않음 — Streamlit Secrets / localStorage만 사용
+  // 배포 빌드에는 API 키를 번들에 넣지 않음 — Vercel env / localStorage만 사용
   if (SECRET_KEYS.has(key) && !import.meta.env.DEV) return '';
+  if (PUBLIC_KEYS.has(key)) {
+    const vite = import.meta.env[key];
+    if (vite && String(vite).trim()) return String(vite).trim();
+  }
   const vite = import.meta.env[key];
   if (vite && String(vite).trim()) return String(vite).trim();
   return '';
