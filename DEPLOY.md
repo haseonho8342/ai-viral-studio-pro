@@ -34,7 +34,7 @@ git push origin main
 |------|-----|
 | Repository | `haseonho8342/ai-viral-studio-pro` |
 | Branch | `main` |
-| Main file path | `app.py` |
+| Main file path | `streamlit_app.py` 또는 `app.py` |
 | App URL | 원하는 이름 (예: `ai-viral-studio`) |
 
 5. **Advanced settings → Secrets** 에 아래 형식 입력:
