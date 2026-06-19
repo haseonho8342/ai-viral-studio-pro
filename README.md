@@ -69,6 +69,16 @@ src/
 - YouTube Data API v3
 - Google Gemini API (선택)
 
+## Cloudflare Pages 배포
+
+자세한 내용은 [DEPLOY.md](./DEPLOY.md) 참고.
+
+1. https://dash.cloudflare.com → **Workers & Pages** → GitHub 연동
+2. 빌드: `npm run build` / 출력: `dist`
+3. 환경 변수: `VITE_YOUTUBE_API_KEY`, `VITE_GEMINI_API_KEY`
+
+`main` push 시 GitHub Actions로 자동 배포도 가능합니다.
+
 ## 보안
 
 - `.env.local`은 Git에 포함되지 않습니다.
