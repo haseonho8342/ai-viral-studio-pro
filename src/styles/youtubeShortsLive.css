@@ -1,0 +1,163 @@
+/* youtubeShortsLive.css - 유튜브 쇼츠 실시간 */
+
+.youtube-shorts-live {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.youtube-shorts-live-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-xl);
+}
+
+@media (min-width: 1024px) {
+  .youtube-shorts-live-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.youtube-shorts-live-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: var(--radius-xl);
+}
+
+.youtube-shorts-live-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.youtube-shorts-live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #f43f5e;
+  animation: live-pulse 1.5s ease infinite;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.youtube-shorts-live-text {
+  font-size: 0.6875rem;
+  font-weight: 900;
+  color: #fda4af;
+  letter-spacing: 0.1em;
+}
+
+.youtube-shorts-live-source {
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+}
+
+.youtube-shorts-live-new {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.youtube-shorts-live-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.youtube-shorts-live-regions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.youtube-shorts-live-region {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-muted);
+  transition: all var(--transition);
+}
+
+.youtube-shorts-live-region--active {
+  color: #fff;
+  background: #dc2626;
+  border-color: #ef4444;
+}
+
+.youtube-shorts-live-auto {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.youtube-shorts-live-auto input {
+  accent-color: #f43f5e;
+}
+
+.youtube-shorts-live-sync {
+  font-size: 0.625rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.youtube-shorts-live-error {
+  font-size: 0.6875rem;
+  color: #fca5a5;
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+}
+
+.youtube-shorts-live-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.youtube-shorts-live-status-dot {
+  background: #f43f5e !important;
+}
+
+.dashboard-grid--updating {
+  opacity: 0.85;
+  transition: opacity 0.3s;
+}
+
+.viral-card-new {
+  position: absolute;
+  top: 0.5rem;
+  left: 3rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.5625rem;
+  font-weight: 900;
+  color: #fff;
+  background: #dc2626;
+  border-radius: var(--radius-sm);
+  animation: fadeIn 0.3s ease;
+}
